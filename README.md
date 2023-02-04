@@ -9,7 +9,7 @@ a super simple message bus and event management system for robotics
     - must define a specific message type
     - YAML syntax (like python dictionaries)
     - timers
-        - can pass an optional timer to a message that will pause the full delivery of the message once it has arrived at the destination node
+        - pass 0 seconds if you don't want a timer, but it'll execute regardless
     - acknowledgements
         - optional flag to request a return code like 200, 404, etc.
 - nodes
@@ -37,3 +37,7 @@ a super simple message bus and event management system for robotics
 - encrypt?
 - should publisher nodes be able to specify which subscriber node they want to send information to? or should it remain limited to "you can publish to a set of buses and subscribers can subscribe to a set of buses"
 - return errors worth the complexity?
+
+
+### future
+- might need functions to disassemble data into packets and reassemble on the other side, but since this is meant to run on a single main computer, I don't think that matters for now. it's not a big deal to pass a packet containing 128**2 ints
