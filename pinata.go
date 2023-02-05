@@ -3,34 +3,13 @@ package main
 import (
     "fmt"
     "time"
-    "strconv"
+    "github.com/spencerhhubert/pinata/message"
 )
 
-type Message struct {
-    purpose    string
-    timestamp  time.Time
-    data       map[string]interface{}
-    timer      time.Time
-}
-
-type Bus struct {
-    purpose    string 
-    name       string
-    queue      []Message
-}
-
-//make a time.Time type n milliseconds in the future
-func timer(ms int) (time.Time) {
-    return time.Now().Add(time.Millisecond * time.Duration(ms))
-}
-
 func main() {
-    msg := Message{
-        purpose: "servo",
-        timestamp: time.Now(), 
-        data: map[string]interface{}{ "angle": 127, "speed": 3 },
-        timer: timer(0),
-    }
-    content := msg.data["angle"].(int)
-    fmt.Printf(strconv.Itoa(content))
+    data := map[string]interface{}{ "angle": 127, "speed": 3 }
+    m := message.New(data, "servo", 127)
+    fmt.Printf("%T\n", m)
+    time.Sleep(time.Second)
+    fmt.Println(m.Purpose)
 }
