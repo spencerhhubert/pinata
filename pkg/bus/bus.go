@@ -3,7 +3,6 @@ package bus
 import (
     "time"
     "sync"
-    "fmt"
 )
 
 type Bus struct {
@@ -41,7 +40,6 @@ func (b *Bus) Sub(s Subscriber) {
     s.Id = len(b.subscribers)
     b.subscribers[s.Id] = s
     for m := range s.Queue {
-        fmt.Println("Tried to callback")
         time.Sleep(time.Until(m.Delay))
         s.Callback(m)
     }

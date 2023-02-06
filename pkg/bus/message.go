@@ -5,13 +5,13 @@ import (
 )
 
 type Message struct {
-    Data       map[string]interface{}
+    Data       any
     Purpose    string
     Timestamp  time.Time
     Delay      time.Time
 }
 
-func NewMessage(data map[string]interface{}, purpose string, delay int) Message {
+func NewMessage(data any, purpose string, delay int) Message {
     return Message{
         Data: data,
         Purpose: purpose,
