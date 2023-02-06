@@ -3,13 +3,35 @@ package main
 import (
     "fmt"
     "time"
+    "github.com/spencerhhubert/pinata/bus"
     "github.com/spencerhhubert/pinata/message"
+    "github.com/spencerhhubert/pinata/subscriber"
 )
 
+func simpleCallback(mes message.Message) {
+    fmt.Println(mes.Data["data"])
+}
+
 func main() {
-    data := map[string]interface{}{ "angle": 127, "speed": 3 }
-    m := message.New(data, "servo", 127)
-    fmt.Printf("%T\n", m)
-    time.Sleep(time.Second)
-    fmt.Println(m.Purpose)
+    data1 := map[string]interface{}{ "data": "one" }
+    data2 := map[string]interface{}{ "data": "two" }
+    data3 := map[string]interface{}{ "data": "three" }
+
+    mes1 := message.New(data1, "whocares", 100)
+    mes2 := message.New(data2, "whocares", 100)
+    mes3 := message.New(data3, "whocares", 100)
+
+    sub1 := subscriber.New(simpleCallback)
+
+    bus := bus.New("whocares")
+    bus.Sub(sub1)
+
+    bus.Publish(mes1)
+    bus.Run()
+    bus.Publish(mes2)
+    bus.Publish(mes3)
+    time.Sleep(time.Second*2)
+
+    bus.Unsub(sub1)
+    bus.Kill()
 }

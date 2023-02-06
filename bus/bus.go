@@ -1,33 +1,82 @@
 package bus
 
 import (
-    "fmt"
     "time"
-    "strconv"
+    "sync"
+    "fmt"
+    "github.com/spencerhhubert/pinata/message"
+    "github.com/spencerhhubert/pinata/subscriber"
 )
 
 type Bus struct {
-    Purpose    string 
-    Queue      chan Message
+    Purpose        string 
+    Queue          chan message.Message
+    subscribers    map[int]subscriber.Subscriber
+    Wg             sync.WaitGroup
+    rate           int
 }
 
 func New(purpose string) Bus {
     return Bus{
-        Purpose: purpose,
-        Queue: make(chan Message),
+        Purpose:         purpose,
+        Queue:           make(chan message.Message),
+        subscribers:     make(map[int]subscriber.Subscriber),
+        rate:            200,
     }
 }
 
-func (b *Bus) Publish(m Message) {
-    b.queue <- m
+func (b *Bus) Publish(m message.Message) {
+    go func() {
+        b.Queue <- m
+    }()
 }
 
-func (b *Bus) Subscribe(callback func(Message)) {
+func (b *Bus) Run() {
+//    defer b.Wg.Wait() //b.run() after at least one subscriber has been added
     go func() {
-        for m := range b.queue {
-            time.Sleep(time.Until(m.delay))
-            callback(m)
+        for {
+            select {
+            case m, present := <-b.Queue:
+                if present {
+                    fmt.Println("Run() went")
+                    for _,s := range b.subscribers {
+                        s.Queue <- m
+                    }
+                    time.Sleep(time.Millisecond * time.Duration(b.rate)) //refresh rate
+                }
+            default:
+                continue
+            }
         }
     }()
 }
 
+func (b *Bus) Sub(s subscriber.Subscriber) {
+    b.Wg.Add(1)
+    s.Id = len(b.subscribers)
+    b.subscribers[s.Id] = s
+    go func() {
+        for {
+            m, present := <-s.Queue
+            if present {
+                fmt.Println("Tried to callback")
+                time.Sleep(time.Until(m.Delay))
+                s.Callback(m)
+            }
+        }
+    }()
+}
+
+func (b *Bus) Unsub(s subscriber.Subscriber) {
+    delete(b.subscribers, s.Id)
+    b.Wg.Done()
+    close(s.Queue)
+}
+
+func (b *Bus) Kill() {
+    for _,s := range(b.subscribers) {
+        b.Unsub(s)
+    }
+    b.Wg.Wait()
+    close(b.Queue)
+}
