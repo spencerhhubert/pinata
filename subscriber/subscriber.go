@@ -11,6 +11,6 @@ type Subscriber struct {
 }
 
 func New(callback func(message.Message)) Subscriber {
-    return Subscriber{ Callback: callback, Queue: make(chan message.Message), Id: 0 }
+    return Subscriber{ Callback: callback, Queue: make(chan message.Message, 1), Id: 0 }
 }
 

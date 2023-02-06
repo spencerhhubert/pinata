@@ -22,15 +22,15 @@ func main() {
     mes3 := message.New(data3, "whocares", 100)
 
     sub1 := subscriber.New(simpleCallback)
-
     bus := bus.New("whocares")
-    bus.Sub(sub1)
+    time.Sleep(time.Second*1)
 
-    bus.Publish(mes1)
-    bus.Run()
-    bus.Publish(mes2)
-    bus.Publish(mes3)
-    time.Sleep(time.Second*2)
+    go bus.Sub(sub1)
+    go bus.Publish(mes1)
+    go bus.Run()
+    go bus.Publish(mes2)
+    go bus.Publish(mes3)
+    time.Sleep(time.Second*1)
 
     bus.Unsub(sub1)
     bus.Kill()
