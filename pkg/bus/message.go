@@ -1,4 +1,4 @@
-package message 
+package bus
 
 import (
     "time"
@@ -11,7 +11,7 @@ type Message struct {
     Delay      time.Time
 }
 
-func New(data map[string]interface{}, purpose string, delay int) Message {
+func NewMessage(data map[string]interface{}, purpose string, delay int) Message {
     return Message{
         Data: data,
         Purpose: purpose,

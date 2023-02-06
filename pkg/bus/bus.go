@@ -4,28 +4,26 @@ import (
     "time"
     "sync"
     "fmt"
-    "github.com/spencerhhubert/pinata/message"
-    "github.com/spencerhhubert/pinata/subscriber"
 )
 
 type Bus struct {
     Purpose        string 
-    Queue          chan message.Message
-    subscribers    map[int]subscriber.Subscriber
+    Queue          chan Message
+    subscribers     map[int]Subscriber
     Wg             sync.WaitGroup
     rate           int
 }
 
-func New(purpose string) Bus {
+func NewBus(purpose string) Bus {
     return Bus{
         Purpose:         purpose,
-        Queue:           make(chan message.Message, 1),
-        subscribers:     make(map[int]subscriber.Subscriber),
-        rate:            200,
+        Queue:           make(chan Message),
+        subscribers:     make(map[int]Subscriber),
+        rate:            10,
     }
 }
 
-func (b *Bus) Publish(m message.Message) {
+func (b *Bus) Publish(m Message) {
     b.Queue <- m
 }
 
@@ -38,7 +36,7 @@ func (b *Bus) Run() {
     }
 }
 
-func (b *Bus) Sub(s subscriber.Subscriber) {
+func (b *Bus) Sub(s Subscriber) {
     b.Wg.Add(1)
     s.Id = len(b.subscribers)
     b.subscribers[s.Id] = s
@@ -49,7 +47,7 @@ func (b *Bus) Sub(s subscriber.Subscriber) {
     }
 }
 
-func (b *Bus) Unsub(s subscriber.Subscriber) {
+func (b *Bus) Unsub(s Subscriber) {
     delete(b.subscribers, s.Id)
     b.Wg.Done()
     close(s.Queue)
