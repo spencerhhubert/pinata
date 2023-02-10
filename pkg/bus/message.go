@@ -2,19 +2,23 @@ package bus
 
 import (
     "time"
+    "reflect"
+    "golang.org/x/exp/constraints"
 )
 
-type Message struct {
-    Data       any
-    Purpose    string
-    Timestamp  time.Time
-    Delay      time.Time
+type validData interface {
+    constraints.Ordered | []byte
 }
 
-func NewMessage(data any, purpose string, delay int) Message {
-    return Message{
+type Message[X comparable, Y validData] struct {
+    Data map[X]Y 
+    Timestamp time.Time
+    Delay time.Time
+}
+
+func NewMessage(data map[X]Y, delay int) Message {
+    return Message[X,Y]{
         Data: data,
-        Purpose: purpose,
         Timestamp: time.Now(),
         Delay: timer(delay),
     }

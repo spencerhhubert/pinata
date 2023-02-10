@@ -3,14 +3,28 @@ package bus
 import (
     "time"
     "sync"
+    "golang.org/x/exp/constraints"
 )
 
-type Bus struct {
-    Purpose        string 
-    Queue          chan Message
-    subscribers     map[int]Subscriber
+type validData interface {
+   constraints.Ordered | []byte 
+}
+
+
+type Bus[X comparable, Y validData] struct {
+    Queue chan Message[X,Y]
+    subscribers    map[int]Subscriber
     Wg             sync.WaitGroup
     rate           int
+}
+
+
+
+
+
+type Bus[D Data] struct {
+    Queue          chan Message[D]
+    subscribers    map[int]Subscriber
 }
 
 func NewBus(purpose string) Bus {
